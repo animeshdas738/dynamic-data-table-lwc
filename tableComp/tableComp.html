@@ -1,0 +1,131 @@
+<template>
+    <lightning-card title={tabletitle} icon-name={tableheadericon}>
+        <template if:true={isMassActionEnabled}>
+            <lightning-button-group slot="actions">
+                <!--<lightning-button-icon icon-name="utility:add"></lightning-button-icon>
+                <lightning-button-icon icon-name="utility:save" onclick={handleallsave}></lightning-button-icon>-->
+                <lightning-button-icon icon-name="utility:download" onclick={handledownload}></lightning-button-icon>
+                <!--<lightning-button-icon icon-name="utility:delete"></lightning-button-icon>-->
+            </lightning-button-group>
+        </template>
+        <template if:true={isSearchEnabled}>
+            <div slot="actions">
+                <c-object-select-combo selected-values={selectedrecords} 
+                                    label={searchobjectlabel}
+                                    sobject-name={searchObjectName}
+                                    onrecordselectevent={handlerecordselectevent}
+                                    multi-select="true"></c-object-select-combo>
+            </div>
+        </template>
+        <p class="slds-p-horizontal_small"></p>
+            <!--{compDataList}-->
+            <table class="slds-table slds-table_bordered slds-table_col-bordered slds-table_fixed-layout slds-table_resizable-cols" role="grid">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <template if:true={isSelectable}>
+                            <th class="slds-text-align_right slds-cell_action-mode slds-is-resizable dv-dynamic-width" scope="col" style="width:3.25rem">
+                                <span id="column-group-header" class="slds-assistive-text">Select a row</span>
+                                <div class="slds-th__action slds-th__action_form">
+                                  <div class="slds-checkbox">
+                                    <input type="checkbox" disabled={isHeaderSelectionDisabled} name="options" id="checkbox-unique-select-id" value="checkbox-unique-select-id" tabindex="0" aria-labelledby="check-select-all-label column-group-header" checked={allRecordsChecked} onchange={handleallrecordschecked}/>
+                                    <label class="slds-checkbox__label" for="checkbox-unique-select-id" id="check-select-all-label">
+                                      <span class="slds-checkbox_faux"></span>
+                                      <span class="slds-form-element__label slds-assistive-text">Select All</span>
+                                    </label>
+                                  </div>
+                                </div>
+                            </th>
+                        </template>
+                        <template for:each={headerlist} for:index="rownum" for:item="headerobj">
+                            <template if:true={headerobj.showcolumn}>
+                                <th key={headerobj.apiname} class="slds-is-resizable slds-is-sortable slds-cell_action-mode" scope="col">
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-has-flexi-truncate">
+                                        <span class="slds-truncate" title={headerobj.label} style="padding-left: 3%;">{headerobj.label}</span>
+                                        <span class="slds-icon_container">
+                                            <template if:true={headerobj.sortable}>
+                                                <template if:true={headerobj.ascsortorder}>
+                                                    <lightning-icon id={headerobj.apiname} alternative-text={headerobj.apiname} icon-name="utility:arrowdown" size="xx-small" style="cursor:pointer;" onclick={changeDescOrder}></lightning-icon>
+                                                </template>
+                                                <template if:false={headerobj.ascsortorder}>
+                                                    <lightning-icon id={headerobj.apiname} alternative-text={headerobj.apiname} icon-name="utility:arrowup" size="xx-small" style="cursor:pointer;" onclick={changeAscOrder}></lightning-icon>
+                                                </template>
+                                            </template>
+                                        </span>
+                                    </div>
+                                    <div class="slds-resizable">
+                                        <input type="range" aria-label="Name column width" class="slds-resizable__input slds-assistive-text" id="cell-resize-handle-540" max="1000" min="20" tabindex="0" />
+                                        <span class="slds-resizable__handle" onmousedown={calculateWidth} ondragleave={setNewWidth}>
+                                          <span class="slds-resizable__divider"></span>
+                                        </span>
+                                    </div>
+                                </th>
+                            </template>
+                        </template>
+                        <template if:true={isActionable}>
+                            <th>
+                                Action
+                            </th>
+                        </template>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template for:each={compDataList} for:index="rownum" for:item="datarow">
+                        <tr key={datarow.Id}>
+                            <template if:true={isSelectable}>
+                                <td class="slds-text-align_right slds-cell_action-mode" role="gridcell">
+                                    <div class="slds-checkbox">
+                                        <input type="checkbox" name="options" id={rownum} value={rownum} tabindex="0" aria-labelledby="check-button-label-01 column-group-header" checked={datarow.isSelected} onchange={handlesinglerecordchecked} data-index={rownum}/>
+                                        <label class="slds-checkbox__label" for={rownum} id={rownum}>
+                                          <span class="slds-checkbox_faux"></span>
+                                          <span class="slds-form-element__label slds-assistive-text">Select item 1</span>
+                                        </label>
+                                    </div>
+                                </td>
+                            </template>
+                            <template for:each={headerlist} for:item="headerfield">
+                                <template if:true={headerfield.showcolumn}>
+                                    <td key={headerfield.apiname} class="slds-cell_action-mode" role="gridcell">
+                                        <c-table-cell record-obj={datarow} 
+                                                      record-lookup-obj={headerfield.lookupobj}
+                                                      record-lookup-obj-api-name={headerfield.lookupobjapiname}
+                                                      record-field={headerfield.apiname} 
+                                                      record-field-type={headerfield.fieldtype}
+                                                      record-field-edit-mode={datarow.isEditMode}
+                                                      record-field-editable={headerfield.editable}
+                                                      record-row-num={rownum}
+                                                      oncellvaluechangeevent={handlecellvaluechangeevent}></c-table-cell>
+                                    </td>
+                                </template>
+                            </template>
+                            <template if:true={isActionable}>
+                                <td>
+                                    <template if:true={datarow.isLoading}>
+                                        <c-stencil height="10"></c-stencil>
+                                    </template>
+                                    <template if:false={datarow.isLoading}>
+                                        <lightning-button-group>
+                                            <template if:false={datarow.isEditMode}>
+                                                <lightning-button-icon icon-name="utility:edit" onclick={handleactionrowedit} data-id={datarow.Id} data-index={rownum}></lightning-button-icon>
+                                                <!--<lightning-button-icon icon-name="utility:delete" data-id={datarow.Id} data-index={rownum}></lightning-button-icon>
+                                                <lightning-button-icon icon-name="utility:copy" data-id={datarow.Id} data-index={rownum}></lightning-button-icon>-->
+                                            </template>
+                                            <template if:true={datarow.isEditMode}>
+                                                <lightning-button-icon icon-name="utility:save" onclick={handleactionrowsave} data-id={datarow.Id} data-index={rownum}></lightning-button-icon>
+                                                <lightning-button-icon icon-name="utility:skip_back" onclick={handleactionrowcancel} data-id={datarow.Id} data-index={rownum}></lightning-button-icon>
+                                            </template>
+                                        </lightning-button-group>
+                                    </template>
+                                </td>
+                            </template>
+                        </tr>
+                    </template>
+                </tbody>   
+            </table>
+            <template if:true={isPaginationEnabled}>
+                <p slot="footer">
+                    <c-search_object_pagination page-num={recordpagenum} record-num={recordcount} onpageforward={handlepageforward} onpagebackward={handlepagebackward}></c-search_object_pagination>
+                </p>
+            </template>
+    </lightning-card>
+    
+</template>

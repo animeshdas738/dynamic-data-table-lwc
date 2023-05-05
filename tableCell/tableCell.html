@@ -1,0 +1,52 @@
+<template>
+    <div class="slds-truncate" title="">
+        <template if:true={recordObj.isLoading}>
+            <c-stencil height="10"></c-stencil>
+        </template>
+        <template if:false={recordObj.isLoading}>
+            <template if:true={isText}>
+                <template if:true={recordFieldEditMode}>
+                    <template if:true={recordFieldEditable}>
+                        <lightning-input type="text" label="" variant="label-hidden" value={recordValue} onchange={handlecellchange}></lightning-input>
+                    </template>
+                    <template if:false={recordFieldEditable}>
+                        <lightning-formatted-text value={recordValue}></lightning-formatted-text>
+                    </template>
+                </template>
+                <template if:false={recordFieldEditMode}>
+                    <lightning-formatted-text value={recordValue}></lightning-formatted-text>
+                </template>
+            </template>
+            <template if:true={isLink}>
+                <!--<lightning-formatted-text value={recordValue}></lightning-formatted-text>-->
+                <div onclick={viewRecord} data-id={recordLookupObjId} style="color:blue;cursor:pointer;">
+                    <u>{recordValue}</u>
+                </div>
+                <!--<lightning-tile label={recordValue} onclick={viewRecord} data-id={recordLookupObj.Id}>-->
+                    <!--<lightning-button variant="Base" label="Record View" onclick={viewRecord} value={recordLookupObj.Id}></lightning-button>-->
+               <!--</lightning-tile>-->
+            </template>
+            <template if:true={isSelf}>
+                <!--<lightning-formatted-text value={recordValue}></lightning-formatted-text>-->
+                <div onclick={viewSelfRecord} data-id={recordObj.Id} style="color:blue;cursor:pointer;">
+                    <u>{recordValue}</u>
+                </div>
+                <!--<lightning-tile label={recordValue} onclick={viewRecord} data-id={recordLookupObj.Id}>-->
+                    <!--<lightning-button variant="Base" label="Record View" onclick={viewRecord} value={recordLookupObj.Id}></lightning-button>-->
+               <!--</lightning-tile>-->
+            </template>
+            <template if:true={isLongText}>
+                
+            </template>
+            <template if:true={isBoolean}>
+                <lightning-input type="checkbox" label="" name="" checked={recordValue} disabled="true"></lightning-input>
+            </template>
+            <template if:true={isDate}>
+                <lightning-formatted-number value={recordValue}></lightning-formatted-number>
+            </template>
+            <template if:true={isNumber}>
+                <lightning-formatted-number value={recordValue}></lightning-formatted-number>
+            </template>
+        </template>
+    </div>
+</template>
